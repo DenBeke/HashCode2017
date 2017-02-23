@@ -33,25 +33,25 @@ class Endpoint:
         '''
         Initialize endpoint
         '''
-        self.id   = endpoint_id
+        self.id                 = endpoint_id
         self.datacenter_latency = int(datacenter_latency)
-        self.caches = caches
-        self.latencies = latencies # respective latencies to caches
+        self.caches             = caches
+        self.latencies          = latencies # respective latencies to caches
 
 class Request:
     def __init__(self, request_id, amount, video_id, endpoint_id):
         '''
         Initialize request
         '''
-        self.id   = request_id
-        self.amount = int(amount)      
-        self.video_id = int(video_id)
+        self.id          = request_id
+        self.amount      = int(amount)      
+        self.video_id    = int(video_id)
         self.endpoint_id = int(endpoint_id)
 
-videos = list()
-caches = list()
+videos    = list()
+caches    = list()
 endpoints = list()
-requests = list()
+requests  = list()
 
 
 # Read line from std in
@@ -86,7 +86,7 @@ for request in range(0, config.request_descriptions):
     requests.append(Request(request, line[2], line[0], line[1]))
 
 
-print(requests[0].id)
-print(requests[0].amount)
-print(requests[0].video_id)
-print(requests[0].endpoint_id)
+#print(requests[0].id)
+#print(requests[0].amount)
+#print(requests[0].video_id)
+#print(requests[0].endpoint_id)
