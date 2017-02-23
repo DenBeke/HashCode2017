@@ -21,6 +21,10 @@ class Video:
         self.id   = video_id
         self.size = int(size)
 
+
+    def __lt__(self, other):
+        return self.id < other.id
+
 class Cache:
     def __init__(self, cache_id, size):
         '''
@@ -76,6 +80,9 @@ class Endpoint:
 
         return None
 
+    def __lt__(self, other):
+        return self.id < other.id
+
 class Request:
     def __init__(self, request_id, amount, video, endpoint):
         '''
@@ -96,7 +103,7 @@ def generateResult(caches):
         out += str(cache.id) + " "
         for video in cache.videos:
             out += str(video.id) + " "
-        out += "0 \n"
+        out += "\n"
         count += 1
 
     out = str(count) + "\n" + out
@@ -182,7 +189,6 @@ endpointQueue = []
 for endpoint in endpoints:
     for request in endpoint.requests:
         # maybe use global total requests instead of endpoint.total_requests
-        print(request.video)
         heapq.heappush(endpoint.videoQueue, (1 - request.amount / endpoint.total_requests, request.video))
     heapq.heappush(endpointQueue, (1 - endpoint.popularity, endpoint))
 
