@@ -36,19 +36,24 @@ class Endpoint:
         '''
         self.id                 = endpoint_id
         self.datacenter_latency = int(datacenter_latency)
-        self.caches             = caches
-        self.latencies          = latencies # respective latencies to caches
+        self.caches = caches
+        self.latencies = latencies # respective latencies to caches
+        self.latency_map = dict()
+        self.requests = list()
+        self.total_requests = 0
+
+        for i in range(len(latencies)):
+            self.latency_map[caches[i]] = latencies[i]
 
 class Request:
-    def __init__(self, request_id, amount, video_id, endpoint_id):
+    def __init__(self, request_id, amount, video, endpoint):
         '''
         Initialize request
         '''
-        self.id          = request_id
-        self.amount      = int(amount)      
-        self.video_id    = int(video_id)
-        self.endpoint_id = int(endpoint_id)
-
+        self.id   = request_id
+        self.amount = int(amount)      
+        self.video = video
+        self.endpoint = endpoint
 
 
 def generateResult(caches):
@@ -105,14 +110,27 @@ for endpoint in range(0, config.endpoints):
 
 for request in range(0, config.request_descriptions):
     line = sys.stdin.readline().split()
-    requests.append(Request(request, line[2], line[0], line[1]))
+    requests.append(Request(request, line[2], videos[int(line[0])], endpoints[int(line[1])]))
 
 
-#print(len(caches))
+for request in requests:
+    endpoint = request.endpoint
+    video = request.video
+
+    endpoint.requests.append(request)
+    endpoint.total_requests += request.amount
+
+
+
+
+print(requests[0].id)
+print(requests[0].amount)
+print(requests[0].video)
+print(requests[0].endpoint)
+
+
+print(endpoints[0].total_requests)
+
 
 print(generateResult(caches), end="")
 
-#print(requests[0].id)
-#print(requests[0].amount)
-#print(requests[0].video_id)
-#print(requests[0].endpoint_id)
