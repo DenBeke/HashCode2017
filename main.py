@@ -56,6 +56,8 @@ class Request:
         self.amount = int(amount)      
         self.video = video
         self.endpoint = endpoint
+        self.current_latency = endpoint.datacenter_latency
+        self.temp_score = 0
 
 
 def generateResult(caches):
@@ -134,7 +136,8 @@ class Score:
 
 
 scores = dict() #score_id to score
-
+"""
+print("START")
 for request in requests:
     for cache in request.endpoint.caches:
 
@@ -146,15 +149,15 @@ for request in requests:
             scores[score_id] = prev_score
         
         prev_score.score += request.amount * (endpoint.datacenter_latency - request.endpoint.latency_map[cache])
-        
+print ("SCORED REQUESTS")
 remaining = dict()
 for cache in caches:
     remaining[cache] = config.capacity
 
 scores_list = scores.values()
-
+print("SORTING SCORES")
 sorted_scores = sorted(scores_list, key=operator.attrgetter('score'), reverse=True)
-
+print("SORTED SCORES")
 
 for score in sorted_scores:
 
@@ -167,3 +170,55 @@ for score in sorted_scores:
 
 
 print(generateResult(caches), end="")
+"""
+
+W1 = 1000
+W2 = 1
+W3 = 1
+
+def latency_gain(cache, request):
+    return request.current_latency - request.endpoint.latency_map[cache]
+
+while True:
+    assigned = False
+    #print("MAINLOOP")
+    for cache in caches:
+        #print("CACHE")
+        these_requests = list()
+        cur_highest_request = None
+        cur_highest_score = 0
+        for request in requests:
+            if cache not in request.endpoint.caches:
+                continue
+            if request.video.size > cache.size:
+                continue
+            if request.video in cache.videos:
+                continue
+
+            these_requests.append(request)
+            request.temp_score = W1 * (1 / request.video.size) + W2 * request.amount + W3 * latency_gain(cache, request)
+
+            if request.temp_score > cur_highest_score:
+                cur_highest_score = request.temp_score
+                cur_highest_request = request
+
+
+        if cur_highest_request is not None:
+
+            assigned = True
+
+            cache.videos.append(cur_highest_request.video)
+            cache.size -= cur_highest_request.video.size
+            
+            for request in these_requests:
+                if request.video == cur_highest_request.video:
+                    new_latency = request.endpoint.latency_map[cache]
+                    if request.current_latency > new_latency:
+                        request.current_latency = new_latency
+
+
+    if not assigned:
+        break 
+
+print(generateResult(caches), end="")
+    
