@@ -51,8 +51,21 @@ class Request:
 
 
 
-#def generateResult(caches):
-#    for cache in caches:
+def generateResult(caches):
+    out = ""
+    count = 0
+    for cache in caches:
+        if len(cache.videos) == 0:
+            continue
+        out += str(cache.id) + " "
+        for video in cache.videos:
+            out += video.id + " "
+        out += "0 \n"
+        count += 1
+    
+    out = str(count) + "\n" + out
+    return out.strip('\n')
+    
         
 
 
@@ -94,6 +107,10 @@ for request in range(0, config.request_descriptions):
     line = sys.stdin.readline().split()
     requests.append(Request(request, line[2], line[0], line[1]))
 
+
+#print(len(caches))
+
+print(generateResult(caches), end="")
 
 #print(requests[0].id)
 #print(requests[0].amount)
