@@ -1,4 +1,5 @@
 import sys
+import heapq
 
 class Config:
     def __init__(self, line):
@@ -28,6 +29,23 @@ class Cache:
         self.id   = cache_id
         self.size = int(size)
         self.videos = list() # videos to be served
+        self.usage = 0
+
+
+    def getFreeSpace(self):
+        return self.size - self.usage
+
+    def addVideo(self, video):
+        if video in self.videos:
+            return True
+
+        if self.usage + video.size > self.size:
+            return False
+
+        self.videos.append(video)
+        self.usage += video.size
+
+        return True
 
 class Endpoint:
     def __init__(self, endpoint_id, datacenter_latency, caches, latencies):
@@ -42,8 +60,21 @@ class Endpoint:
         self.requests = list()
         self.total_requests = 0
 
+        self.popularity = 0
+
+        self.videoQueue = []
+
         for i in range(len(latencies)):
             self.latency_map[caches[i]] = latencies[i]
+
+        self.sorted_latency_list = [(k, self.latency_map[k]) for k in sorted(self.latency_map, key=self.latency_map.get, reverse=False)]
+
+    def getClosestCache(self, size):
+        for (cache, latency) in self.sorted_latency_list:
+            if cache.getFreeSpace() >= size:
+                return cache
+
+        return None
 
 class Request:
     def __init__(self, request_id, amount, video, endpoint):
@@ -51,7 +82,7 @@ class Request:
         Initialize request
         '''
         self.id   = request_id
-        self.amount = int(amount)      
+        self.amount = int(amount)
         self.video = video
         self.endpoint = endpoint
 
@@ -64,14 +95,14 @@ def generateResult(caches):
             continue
         out += str(cache.id) + " "
         for video in cache.videos:
-            out += video.id + " "
+            out += str(video.id) + " "
         out += "0 \n"
         count += 1
-    
+
     out = str(count) + "\n" + out
     return out.strip('\n')
-    
-        
+
+
 
 
 
@@ -106,7 +137,7 @@ for endpoint in range(0, config.endpoints):
         endpoint_caches.append(caches[int(line[0])])
         endpoint_latencies.append(int(line[1]))
     endpoints.append(Endpoint(endpoint, datacenter_latency, endpoint_caches, endpoint_latencies))
-    
+
 
 for request in range(0, config.request_descriptions):
     line = sys.stdin.readline().split()
@@ -123,14 +154,49 @@ for request in requests:
 
 
 
-print(requests[0].id)
-print(requests[0].amount)
-print(requests[0].video)
-print(requests[0].endpoint)
+#print(requests[0].id)
+#print(requests[0].amount)
+#print(requests[0].video)
+#print(requests[0].endpoint)
 
 
-print(endpoints[0].total_requests)
+#print(endpoints[0].total_requests)
 
+
+#print(generateResult(caches), end="")
+
+
+# count total global requests
+total_requests = 0
+for endpoint in endpoints:
+    total_requests += endpoint.total_requests
+
+# calculate popularity per regio
+for endpoint in endpoints:
+    endpoint.popularity = endpoint.total_requests / total_requests
+
+
+
+# insert endpoints in priority queue
+endpointQueue = []
+for endpoint in endpoints:
+    for request in endpoint.requests:
+        # maybe use global total requests instead of endpoint.total_requests
+        print(request.video)
+        heapq.heappush(endpoint.videoQueue, (1 - request.amount / endpoint.total_requests, request.video))
+    heapq.heappush(endpointQueue, (1 - endpoint.popularity, endpoint))
+
+while len(endpointQueue) != 0:
+    (endpointPopularity, endpoint) = heapq.heappop(endpointQueue)
+    #print("ENDPOINT", 1-endpointPopularity, endpoint.id)
+    while len(endpoint.videoQueue) != 0:
+        (videoPopularity, video) = heapq.heappop(endpoint.videoQueue)
+        #print("VIDEO", 1-videoPopularity, video.id)
+
+        closestCache = endpoint.getClosestCache(video.size)
+        if closestCache == None:
+            continue
+
+        closestCache.addVideo(video)
 
 print(generateResult(caches), end="")
-
