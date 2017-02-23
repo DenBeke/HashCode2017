@@ -163,7 +163,7 @@ for score in sorted_scores:
     if this_remaining < this_size:
         continue
     score.cache.videos.append(score.video)
-    remaining[cache] = this_remaining - this_size
+    remaining[score.cache] = this_remaining - this_size
 
 
 print(generateResult(caches), end="")
