@@ -27,13 +27,14 @@ class Cache:
         '''
         self.id   = cache_id
         self.size = int(size)
+        self.videos = list() # videos to be served
 
 class Endpoint:
     def __init__(self, endpoint_id, datacenter_latency, caches, latencies):
         '''
         Initialize endpoint
         '''
-        self.id   = endpoint_id
+        self.id                 = endpoint_id
         self.datacenter_latency = int(datacenter_latency)
         self.caches = caches
         self.latencies = latencies # respective latencies to caches
@@ -43,8 +44,6 @@ class Endpoint:
 
         for i in range(len(latencies)):
             self.latency_map[caches[i]] = latencies[i]
-
-
 
 class Request:
     def __init__(self, request_id, amount, video, endpoint):
@@ -56,10 +55,17 @@ class Request:
         self.video = video
         self.endpoint = endpoint
 
-videos = list()
-caches = list()
+
+#def generateResult(caches):
+#    for cache in caches:
+        
+
+
+
+videos    = list()
+caches    = list()
 endpoints = list()
-requests = list()
+requests  = list()
 
 
 # Read line from std in
@@ -111,3 +117,4 @@ print(requests[0].endpoint)
 
 
 print(endpoints[0].total_requests)
+
