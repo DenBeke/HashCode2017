@@ -1,4 +1,6 @@
 import sys
+import collections
+import operator
 
 class Config:
     def __init__(self, line):
@@ -64,7 +66,7 @@ def generateResult(caches):
             continue
         out += str(cache.id) + " "
         for video in cache.videos:
-            out += video.id + " "
+            out += str(video.id) + " "
         out += "0 \n"
         count += 1
     
@@ -123,14 +125,48 @@ for request in requests:
 
 
 
-print(requests[0].id)
-print(requests[0].amount)
-print(requests[0].video)
-print(requests[0].endpoint)
+class Score:
+    def __init__(self, cache, video):
+        self.id = str(cache.id) + "-" + str(video.id)
+        self.cache = cache
+        self.video = video
+        self.score = 0
 
 
-print(endpoints[0].total_requests)
+scores = dict() #score_id to score
+
+for request in requests:
+    for cache in request.endpoint.caches:
+
+        score_id = str(cache.id) + "-" + str(request.video.id)
+        if score_id in scores:
+            prev_score = scores[score_id]
+        else:
+            prev_score = Score(cache, request.video)
+            scores[score_id] = prev_score
+        
+        prev_score.score += request.amount * (endpoint.datacenter_latency - request.endpoint.latency_map[cache])
+        
+remaining = dict()
+for cache in caches:
+    remaining[cache] = config.capacity
+
+scores_list = scores.values()
+
+sorted_scores = sorted(scores_list, key=operator.attrgetter('score'), reverse=True)
+
+
+for score in sorted_scores:
+
+    
+    this_remaining = remaining[score.cache]
+    this_size = score.video.size
+    if this_remaining < this_size:
+        continue
+    score.cache.videos.append(score.video)
+    remaining[cache] = this_remaining - this_size
 
 
 print(generateResult(caches), end="")
+
 
