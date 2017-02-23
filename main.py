@@ -27,6 +27,7 @@ class Cache:
         '''
         self.id   = cache_id
         self.size = int(size)
+        self.videos = list() # videos to be served
 
 class Endpoint:
     def __init__(self, endpoint_id, datacenter_latency, caches, latencies):
@@ -47,6 +48,14 @@ class Request:
         self.amount      = int(amount)      
         self.video_id    = int(video_id)
         self.endpoint_id = int(endpoint_id)
+
+
+
+#def generateResult(caches):
+#    for cache in caches:
+        
+
+
 
 videos    = list()
 caches    = list()
