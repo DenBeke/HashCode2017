@@ -67,7 +67,7 @@ def generateResult(caches):
         out += str(cache.id) + " "
         for video in cache.videos:
             out += str(video.id) + " "
-        out += "0 \n"
+        out += "\n"
         count += 1
     
     out = str(count) + "\n" + out
@@ -158,7 +158,6 @@ sorted_scores = sorted(scores_list, key=operator.attrgetter('score'), reverse=Tr
 
 for score in sorted_scores:
 
-    
     this_remaining = remaining[score.cache]
     this_size = score.video.size
     if this_remaining < this_size:
@@ -168,5 +167,3 @@ for score in sorted_scores:
 
 
 print(generateResult(caches), end="")
-
-
